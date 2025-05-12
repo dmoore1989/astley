@@ -1,0 +1,11 @@
+projects:
+  my_project:
+    path: /path/to/my_project
+    rules:
+      - project_rule1.erb
+      - project_rule2.erb
+  another_project:
+    path: /path/to/another_project
+    rules:
+      - another_rule.erb
+

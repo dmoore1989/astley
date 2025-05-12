@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require_relative '../lib/astley'
+
+puts 'Astley CLI coming soon.'
+
