@@ -1,5 +1,33 @@
-#!/usr/bin/env ruby
-require_relative '../lib/astley'
+# frozen_string_literal: true
 
-puts 'Astley CLI coming soon.'
+# !/usr/bin/env ruby
 
+require 'thor'
+
+module Astley
+  VERSION = '0.1.0'
+
+  # Command-line interface for Astley
+  class CLI < Thor
+    desc 'version', 'Print the version'
+    def version
+      puts "Astley version #{VERSION}"
+    end
+
+    desc 'list', 'List known projects'
+    def list
+      # TODO: Replace with real project discovery logic
+      projects = %w[project_alpha project_beta project_gamma]
+      puts 'Known projects:'
+      projects.each { |proj| puts "- #{proj}" }
+    end
+
+    desc 'compile PROJECT', 'Compile rules for a project'
+    def compile(project)
+      # TODO: Implement actual rule compilation logic
+      puts "Compiling rules for #{project}..."
+    end
+  end
+end
+
+Astley::CLI.start(ARGV)
