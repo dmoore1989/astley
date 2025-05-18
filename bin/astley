@@ -16,67 +16,28 @@ module Astley
 
     desc 'list', 'List known projects'
     def list
-      require 'yaml'
-      config_path = File.expand_path('../../config/projects.yml', __dir__)
-      unless File.exist?(config_path)
-        puts "Config file not found: #{config_path}"
+      require_relative '../lib/astley/project_lister'
+      begin
+        projects = Astley::ProjectLister.list
+        if projects.empty?
+          puts 'No projects found.'
+        else
+          puts 'Known projects:'
+          projects.each { |proj| puts "- #{proj}" }
+        end
+      rescue => e
+        puts e.message
         exit 1
-      end
-      config = YAML.load_file(config_path)
-      projects = config['projects']&.keys || []
-      if projects.empty?
-        puts 'No projects found.'
-      else
-        puts 'Known projects:'
-        projects.each { |proj| puts "- #{proj}" }
       end
     end
 
     desc 'compile PROJECT AGENTIC', 'Compile rules for a project and agentic system (e.g., cursor)'
     def compile(project, agentic)
-      require 'yaml'
-      require 'erb'
-      require 'fileutils'
-
-      config_path = File.expand_path('../../config/projects.yml', __dir__)
-      unless File.exist?(config_path)
-        puts "Config file not found: #{config_path}"
-        exit 1
-      end
-      config = YAML.load_file(config_path)
-      project_config = config['projects'][project] rescue nil
-      unless project_config
-        puts "Project not found: #{project}"
-        exit 1
-      end
-      rules = project_config['rules'] || []
-      if rules.empty?
-        puts "No rules defined for project: #{project}"
-        exit 0
-      end
-
-      rules_dir = File.expand_path('../../rules', __dir__)
-
-      case agentic.downcase
-      when 'cursor'
-        project_rules_dir = File.join(project_config['path'], 'rules')
-        FileUtils.mkdir_p(project_rules_dir)
-        rules.each do |rule_file|
-          template_path = File.join(rules_dir, rule_file)
-          unless File.exist?(template_path)
-            puts "Template not found: #{template_path}"
-            next
-          end
-          template = File.read(template_path)
-          erb = ERB.new(template)
-          # For now, just pass project name as a variable
-          compiled = erb.result_with_hash(project: project)
-          output_path = File.join(project_rules_dir, File.basename(rule_file, '.erb'))
-          File.write(output_path, compiled)
-          puts "Compiled #{rule_file} -> #{output_path}"
-        end
-      else
-        puts "Agentic system not supported: #{agentic}"
+      require_relative '../lib/astley/rule_compiler'
+      begin
+        Astley::RuleCompiler.compile(project, agentic)
+      rescue => e
+        puts e.message
         exit 1
       end
     end
