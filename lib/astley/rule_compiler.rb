@@ -36,6 +36,28 @@ module Astley
           File.write(output_path, compiled)
           puts "Compiled #{rule_file} -> #{output_path}"
         end
+      when 'avante', 'avante.nvim'
+        modes = %w[agentic planning editing suggesting]
+        project_dir = project_config['path']
+        modes.each do |mode|
+          # Find all rules for this mode (e.g., *_agentic.erb)
+          mode_rule_files = rules.select { |r| r.include?(mode) }
+          next if mode_rule_files.empty?
+          compiled_rules = mode_rule_files.map do |rule_file|
+            template_path = File.join(RULES_DIR, rule_file)
+            unless File.exist?(template_path)
+              warn "Template not found: #{template_path}"
+              next
+            end
+            template = File.read(template_path)
+            erb = ERB.new(template)
+            erb.result_with_hash(project: project)
+          end.compact.join("\n")
+          output_filename = "#{project}.#{mode}.avanterules"
+          output_path = File.join(project_dir, output_filename)
+          File.write(output_path, compiled_rules)
+          puts "Compiled Avante rules for #{mode} -> #{output_path}"
+        end
       else
         raise "Agentic system not supported: #{agentic}"
       end
